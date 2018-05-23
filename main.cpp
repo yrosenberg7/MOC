@@ -12,8 +12,7 @@
 #include "Point.h"
 #include "Throat_Solver.h"
 
-//using namespace std;
-
+/// TESTING GITHUB VERSION CONTROL, DID THIS UPLOAD??????
 
 ///TODO: ***complete throat region solve***
 ///         - add astar, alpha, eps to throat solver constructor, with reference to GM and TH
