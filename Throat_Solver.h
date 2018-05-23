@@ -2,7 +2,7 @@
 #define THROAT_SOLVER_H
 
 #include <list>
-
+#include <iostream>
 
 #include "Point.h"
 #include "Gas_Model.h"
@@ -14,7 +14,8 @@ class Throat_Solver
     public:
         Throat_Solver();
         Throat_Solver(Gas_Model*,Throat*);
-        virtual ~Throat_Solver();
+//        virtual ~Throat_Solver(){std::cout << "Throat solver deconstructed" <<std::endl;}
+        virtual ~Throat_Solver(){}
 
         std::list<Point> Compute_IDL(int npts);
 //        std::array<Point> Compute_IDL(int npts);

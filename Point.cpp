@@ -55,10 +55,10 @@ Point::Point(double xin,double yin, double uin, double vin)
     //this->tag = NA;
 }
 
-Point::~Point()
-{
-    //dtor
-}
+//Point::~Point()
+//{
+//    dtor
+//}
 
 //std::string Point::print()
 void Point::print()

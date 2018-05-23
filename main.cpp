@@ -116,7 +116,7 @@ int main()
 //    array<Point> idl = TS.Compute_IDL(npts); /// compute IDL
 
     /// ### COMPUTE THROAT REGION ###
-    std::list<std::list<Point>> Throat_pts = TS.Compute_THROAT(&idl); /// compute throat region
+    //std::list<std::list<Point>> Throat_pts = TS.Compute_THROAT(&idl); /// compute throat region
 
     ///point values format / order
     std::cout << "\n" << "id" <<"\t"  << "x" <<"\t"
@@ -126,15 +126,22 @@ int main()
                       << "rho" <<"\t" << "M" <<"\t" << std::endl;
     /// finish pts, print
     for (std::list<Point>::iterator it=idl.begin(); it != idl.end(); ++it)
-        {
-            it->finish_pt(&GM);
-//            it->print_xm();
-            it->print();
-        }
+    {
+        it->finish_pt(&GM);
+        it->print_xm();
+        //it->print();
+    }
+
+    //std::cout << "finished printing" << std::endl;
 
     ///close output file
     fclose(output_file);
+    //std::cout << "closed file" << std::endl;
 
+    //delete[] &GM;
+    //delete[] &TH;
+    //delete[] &TS;
+    //delete[] &idl;
 
     std::cout << "\n\n###### END OF PROGRAM ######" << std::endl;
     return 0;

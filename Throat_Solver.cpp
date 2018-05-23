@@ -1,11 +1,14 @@
 #include "Throat_Solver.h"
+
 #include <cmath>
-#include "Throat.h"
 #include <list>
-#include "Throat.h"
 #include <iostream>
 #include <array>
 #include<vector>
+
+#include "Throat.h"
+#include "Throat.h"
+
 
 Throat_Solver::Throat_Solver()
 {
@@ -27,10 +30,10 @@ Throat_Solver::Throat_Solver(Gas_Model* GM, Throat* TH)
     this->eps = (0.5*yt/(3+delta))*sqrt((gamma+1)*(1+delta)/(rad_th/yt));
     //this->xbar=x+eps;
 }
-Throat_Solver::~Throat_Solver()
-{
-    //dtor
-}
+//Throat_Solver::~Throat_Solver()
+//{
+//    //dtor
+//}
 
 //std::list<Point> Throat_Solver::Compute_IDL(Gas_Model* GM, Throat* TH,int npts)
 std::list<Point> Throat_Solver::Compute_IDL(int npts)
@@ -134,7 +137,7 @@ std::list<std::list<Point>> Throat_Solver::Compute_THROAT(std::list<Point>* idl)
 
     }
 
-
+    return throat_pts;
 //    return void;
 } /// end of COMPUTE THROAT
 

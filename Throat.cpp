@@ -1,5 +1,5 @@
 #include "Throat.h"
-#include "y_math.h"
+//#include "y_math.h"
 #include <cmath>
 
 #include <iostream> ///REMOVE?
@@ -49,7 +49,7 @@ Throat::Throat(double upstream_rth, double downstream_rth, double height, double
     }
 }
 
-Throat::~Throat(){}
+//Throat::~Throat(){}
 
 void Throat::print()
 {

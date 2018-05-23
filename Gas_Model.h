@@ -2,13 +2,15 @@
 #define GAS_MODEL_H
 
 
-
+#include <iostream>
 class Gas_Model
 {
     public:
 
         Gas_Model();
         Gas_Model(double, double, double, double);
+//        virtual ~Gas_Model(){std::cout << "Gas Model deconstructed" << std::endl;}
+        virtual ~Gas_Model(){};
 
         void print();
 

@@ -1,6 +1,8 @@
 #ifndef THROAT_H
 #define THROAT_H
 
+#include <iostream>
+
 #include "Point.h"
 #include "Gas_Model.h"
 /** WARNING: UNTESTED*/
@@ -9,7 +11,9 @@ class Throat
     public:
         Throat();
         Throat(double, double, double, double, bool, bool);
-        virtual ~Throat();
+        //virtual ~Throat(){std::cout << "Throat Deconstructed" << std::endl;};
+        virtual ~Throat(){};
+
         double fwall(double);
         double fpwall(double);
         double wall_end();

@@ -4,7 +4,7 @@
 #include "Gas_Model.h"
 #include <string>
 #include <stdio.h>
-
+#include <iostream>
 /** WARNING: INCOMPLETE*/
 class Point
 {
@@ -12,7 +12,8 @@ class Point
         Point();
         Point(double,double); /// create point at location
         Point(double,double, double, double); /// create point at location, with velocity
-        virtual ~Point();
+        //virtual ~Point(){std::cout << "Point id: " <<this->get_id()<< ", deconstructed" << std::endl;}
+        virtual ~Point(){}
 
         //std::string print(); //
         void print();
