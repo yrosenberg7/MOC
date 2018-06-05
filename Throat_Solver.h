@@ -3,6 +3,7 @@
 
 #include <list>
 #include <iostream>
+#include <vector>
 
 #include "Point.h"
 #include "Gas_Model.h"
@@ -17,14 +18,16 @@ class Throat_Solver
 //        virtual ~Throat_Solver(){std::cout << "Throat solver deconstructed" <<std::endl;}
         virtual ~Throat_Solver(){}
 
-        std::list<Point> Compute_IDL(int npts);
+//        std::list<Point> Compute_IDL(int npts);
+        std::vector<Point> Compute_IDL(int npts);
 //        std::array<Point> Compute_IDL(int npts);
-        std::list<std::list<Point>> Compute_THROAT(std::list<Point>* idl);
+//        std::list<std::list<Point>> Compute_THROAT(std::list<Point>* idl);
 //        std::list<std::list<Point>> Compute_THROAT(std::array<Point>* idl);
+        Point Transonic_Velocity(double x, double y);
 
 
     protected:
-        Point Transonic_Velocity(double x, double y);
+
 
     private:
         Gas_Model* GM;

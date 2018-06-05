@@ -12,14 +12,23 @@ class Point
         Point();
         Point(double,double); /// create point at location
         Point(double,double, double, double); /// create point at location, with velocity
-        //virtual ~Point(){std::cout << "Point id: " <<this->get_id()<< ", deconstructed" << std::endl;}
+        Point(const Point& other);
+
         virtual ~Point(){}
 
-        //std::string print(); //
         void print();
         void print_xm();
         void print(FILE*);
         ///void print(&file); // prints to file directly?
+
+        /// COMPARES ONLY ID!
+        bool operator==(const Point&)const;
+        bool operator!=(const Point&)const;
+        bool operator>(const Point&)const;
+        bool operator>=(const Point&)const;
+        bool operator<(const Point&)const;
+        bool operator<=(const Point&)const;
+
 
         void finish_pt(Gas_Model*);
 
@@ -57,7 +66,7 @@ class Point
         int get_id() const;
         ///Point::LOC get_loc() const;
 
-        bool operator==(const Point& b) const;
+        //bool operator==(const Point& b) const;
         //bool operator==(const Point& a, const Point& b);
 
     protected:

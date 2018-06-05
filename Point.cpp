@@ -19,7 +19,7 @@ Point::Point()
     this->rho = 0.0;
     this->M = 0.0;
 
-    this->cid = id++;
+    this->cid = 0;
     //this->tag = NA;
 }
 /// create point at location
@@ -53,6 +53,23 @@ Point::Point(double xin,double yin, double uin, double vin)
 
     this->cid = id++;
     //this->tag = NA;
+}
+
+Point::Point(const Point& other)
+{
+//    std::cout << "COPY POINT!" << std::endl;
+    this->x = other.get_x();
+    this->y = other.get_y();
+    this->u = other.get_u();
+    this->v = other.get_v();
+    this->a = other.get_a();
+    this->T = other.get_T();
+    this->p = other.get_p();
+    this->rho = other.get_rho();
+    this->M = other.get_M();
+
+    //this->cid = id++;
+    this->cid = other.get_id();
 }
 
 //Point::~Point()
@@ -115,11 +132,11 @@ void Point::finish_pt(Gas_Model* GM)
 }
 
 //bool Point::operator==(const Point& a, const Point& b)
-bool Point::operator==(const Point& b) const
-{
-    //return ((b.get_x() == this->get_x()) && (b.get_y() == this->get_y()));
-    return (this->get_x() == b.get_x()) && (this->get_y() == b.get_y());
-}
+//bool Point::operator==(const Point& b) const
+//{
+//    //return ((b.get_x() == this->get_x()) && (b.get_y() == this->get_y()));
+//    return (this->get_x() == b.get_x()) && (this->get_y() == b.get_y());
+//}
 
 
 
@@ -152,4 +169,27 @@ double Point::get_M()const {return this->M;}
 int Point::get_id()const {return this->cid;}
 /// TODO: get loc
 
-//std:string Tri::print(){}
+bool Point::operator==(const Point& other)const
+{
+    return this->get_id() == other.get_id();
+}
+bool Point::operator!=(const Point&other)const
+{
+    return this->get_id() != other.get_id();
+}
+bool Point::operator>(const Point&other)const
+{
+    return this->get_id() > other.get_id();
+}
+bool Point::operator>=(const Point&other)const
+{
+    return this->get_id() >= other.get_id();
+}
+bool Point::operator<(const Point&other)const
+{
+    return this->get_id() < other.get_id();
+}
+bool Point::operator<=(const Point&other)const
+{
+    return this->get_id() <= other.get_id();
+}

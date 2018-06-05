@@ -6,11 +6,14 @@
 #include <iterator>
 #include <stdio.h>
 #include <sstream>
+#include <vector>
 
 #include "Gas_Model.h"
 #include "Throat.h"
 #include "Point.h"
 #include "Throat_Solver.h"
+#include "Tris.h"
+
 
 /// TESTING GITHUB VERSION CONTROL, DID THIS UPLOAD??????
 
@@ -47,8 +50,8 @@ p0	30e5
 */
 
 ///ver 0.0.1 idl
-///ver 0.0.2 throat solve <- HERE...
-///ver 0.0.3 throat tris
+///ver 0.0.2 throat solve
+///ver 0.0.3 throat tris <- HERE...
 ///ver 0.1.1 throat display
 ///ver 0.2.2 idl R
 ///ver 0.2.3 idl R tris
@@ -63,23 +66,34 @@ p0	30e5
 int main()
 {
     ///header
-    std::cout << "\n" << "MoC Supersonic Nozzle Analysis\n" << "C++ Implementation\n"<< "Written by Yoav Rosenberg\n" << "ver 0.0.1" << "\n" << std::endl;
+    std::cout << "\n" << "MoC Supersonic Nozzle Analysis\n" << "C++ Implementation\n"<< "Written by Yoav Rosenberg\n" << "ver 0.0.2" << "\n" << std::endl;
 
     ///declare inputs
     int npts;
     double upstream_rth,downstream_rth,height,max_angle,gamma,R,T0,p0;
     bool axi,ysmooth;
+
+    std::list<Point> POINTS;
+
+    std::string input_file_name = "MoC_input2.txt";
+    std::string output_pts_file_name = "MoC_Points.txt";
+    std::string output_tris_file_name = "MoC_Tris.txt";
     std::string inputs[12];
 
     //FILE* input_file;
     //input_file = fopen("MoC_input2.txt","r");
 
     /// file io
-    FILE* output_file;
-    output_file = fopen("MoC_output.txt","w");
-    std::ifstream input_file("MoC_input2.txt");
+    FILE* output_file_pts;
+    FILE*output_file_tris;
+    output_file_pts = fopen(output_pts_file_name.c_str(),"w");
+    output_file_tris = fopen(output_tris_file_name.c_str(),"w");
+    std::ifstream input_file(input_file_name);
 
     ///extract inputs
+    std::cout<< "Extracting inputs from file: "  << input_file_name << std::endl;
+    std::cout<< "Output point info to file: "  << output_pts_file_name << std::endl;
+    std::cout<< "Output Tris to file: "  << output_tris_file_name << std::endl << std::endl;
     if(input_file.is_open())
     {
         for(int i = 0; i < 11; ++i)
@@ -110,39 +124,126 @@ int main()
     GM.print();
     TH.print();
 
-
     Throat_Solver TS = Throat_Solver(&GM, &TH);
-    std::list<Point> idl = TS.Compute_IDL(npts); /// compute IDL
-//    array<Point> idl = TS.Compute_IDL(npts); /// compute IDL
+    std::cout << "\nComputing IDL..." << std::endl;
+    std::vector<Point> idl = TS.Compute_IDL(npts); /// compute IDL
+
+    /// $$$ DISPLAT IDL $$$
+    for(int i = 0; i < npts; i++)
+    {
+        idl[i].print();
+        POINTS.emplace_back(idl[i]); /// copy
+    }
+
 
     /// ### COMPUTE THROAT REGION ###
-    //std::list<std::list<Point>> Throat_pts = TS.Compute_THROAT(&idl); /// compute throat region
+    std::cout << "\nComputing Throat Region..." << std::endl;
+    std::vector<std::vector<Point>> throat_pts(npts);
+    std::vector<std::vector<Point> >::iterator il = throat_pts.begin();
+    /// throat region looks like this:
+    /// with * = idl pt, and . = transonic solve
+    /// *
+    /// . *
+    /// . . *
+    /// . . . *
 
-    ///point values format / order
+    Point pt;
+    for(int i = 0; i <npts; i++)
+    {
+        for(int j = i; j<npts; j++)
+        {
+            if(i==j)
+            {
+                il->emplace_back(idl[i]); /// copy point from the idl
+                continue;
+            }
+
+            double x = idl[i].get_x();
+            double y = idl[j].get_y();
+            pt = Point(x,y); /// ### solve at throat point ###
+            il->emplace_back(pt);
+            POINTS.emplace_back(pt);
+        }
+        il++;
+    }
+
+    /// $$$ DISPLAT IDL $$$
+    std::vector<std::vector<Point> >::iterator print_it = throat_pts.begin();
+    std::vector<Point>::iterator print_il;
+    for(;print_it != throat_pts.end();print_it++)
+    {
+        print_il = print_it->begin();
+        for(; print_il != print_it->end(); print_il++)
+        {
+            print_il->print();
+        }
+    }
+
+/// ### COMPUT TRIS ###
+    std::cout<< std::endl << std::endl;
+    Tris tr = Tris(); /// used to call tri1 and tri2 funcs... it really should be a static member
+
+    /// create tris from throat region
+    std::list<Tris> TRIS;
+    for(int i = 0; i < npts-1; i++)
+    {
+        for(int j = 0; j < npts-i-1; j++)
+        {
+            if(j == 0)
+            {
+                Tris tri1 = tr.tri(i,j,throat_pts);
+                TRIS.push_back(tri1);
+            }else
+            {
+                Tris tri1 = tr.tri(i,j,throat_pts);
+                Tris tri2 = tr.tri2(i,j,throat_pts);
+                TRIS.push_back(tri1);
+                TRIS.push_back(tri2);
+            }
+        }
+    }
+    /// compute tris from idl_r
+
+        ///point values format / order
+    std::cout << "\nDisplaing Points: ";
     std::cout << "\n" << "id" <<"\t"  << "x" <<"\t"
                       << "y" <<"\t" << "u" <<"\t"
                       << "v" <<"\t" << "a" <<"\t"
                       << "T" <<"\t"  << "p" <<"\t"
                       << "rho" <<"\t" << "M" <<"\t" << std::endl;
-    /// finish pts, print
-    for (std::list<Point>::iterator it=idl.begin(); it != idl.end(); ++it)
+
+
+
+
+    ///print throat
+//    il = throat_pts.begin();
+//    std::vector<Point>::iterator ip;
+//    for(; il != throat_pts.end(); il++)
+//    {
+//        for(ip = il->begin(); ip != il->end(); ip++)
+//        {
+//            ip->print();
+//        }
+//    }
+
+    /// finish pts, sort , print ### IMPLEMENT SORT ### /// ### Change to full point list ###
+    POINTS.sort();
+    for (std::list<Point>::iterator pts =POINTS.begin(); pts != POINTS.end(); ++pts)
     {
-        it->finish_pt(&GM);
-        it->print_xm();
-        //it->print();
+        pts->finish_pt(&GM);
+        pts->print();
     }
 
-    //std::cout << "finished printing" << std::endl;
+    /// print tris
+//    std::cout<< "printing tris: " << std::endl;
+//    for(std::list<Tris>::iterator it = TRIS.begin(); it != TRIS.end(); it++)
+//    {
+//        it->print();
+//    }
 
     ///close output file
-    fclose(output_file);
-    //std::cout << "closed file" << std::endl;
-
-    //delete[] &GM;
-    //delete[] &TH;
-    //delete[] &TS;
-    //delete[] &idl;
-
+    fclose(output_file_pts);
+    fclose(output_file_tris);
     std::cout << "\n\n###### END OF PROGRAM ######" << std::endl;
     return 0;
 }
