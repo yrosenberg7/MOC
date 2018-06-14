@@ -160,7 +160,8 @@ int main()
 
             double x = idl[i].get_x();
             double y = idl[j].get_y();
-            pt = Point(x,y); /// ### solve at throat point ###
+            pt = TS.Transonic_Velocity(x,y);
+            //pt = Point(x,y); /// ### solve at throat point ###
             il->emplace_back(pt);
             POINTS.emplace_back(pt);
         }

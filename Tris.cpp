@@ -43,10 +43,11 @@ Tris Tris::tri(int i, int j, std::vector<std::vector<Point> >& grid)
 {
     /// requires indecis passed in are for the TOP LEFT of a triangle
 
-    /// p1
-    /// |  \
-    /// p2 - p3
-
+    /**
+    p1
+    |  \
+    p2 - p3
+    */
     Point* p1 = &(grid[i][j]);
     Point* p2 = &(grid[i][j+1]);
     Point* p3 = &(grid[i+1][j]);
@@ -60,10 +61,11 @@ Tris Tris::tri2(int i, int j, std::vector<std::vector<Point> >& grid)
 {
     /// requires indecis passed in are for the TOP LEFT of a triangle
 
-    /// p1 - p3
-    ///   \  |
-    ///      p2
-
+    /**
+     p1 - p3
+       \  |
+          p2
+    */
     Point* p4 = &(grid[i][j]);
     Point* p5 = &(grid[i+1][j]);
     Point* p6 = &(grid[i+1][j-1]);
