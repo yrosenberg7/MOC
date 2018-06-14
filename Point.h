@@ -18,6 +18,7 @@ class Point
 
         void print();
         void print_xm();
+        void print_xu();
         void print(FILE*);
         ///void print(&file); // prints to file directly?
 

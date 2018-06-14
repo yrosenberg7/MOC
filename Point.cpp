@@ -102,7 +102,15 @@ void Point::print_xm()
     <<"M: "<< this->get_M() <<"\t\t"
     << std::endl;
 }
-
+void Point::print_xu()
+{
+    std::cout <<""
+    <<"x: "<< this->get_x() <<"\t\t"
+    <<"y: "<< this->get_y() <<"\t\t"
+    <<"u: "<< this->get_u() <<"\t\t"
+    <<"v: "<< this->get_v() <<"\t\t"
+    << std::endl;
+}
 void Point::print(FILE* fout)
 {
     fprintf(fout, "%i\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t\n",this->get_id(),this->get_x(),
