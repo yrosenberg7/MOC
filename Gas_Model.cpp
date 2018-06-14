@@ -7,7 +7,7 @@ Gas_Model::Gas_Model()
 {
     this->gamma = 1.4;
     this->R = 287.04;
-    this->T0 = 300;
+    this->T0 = 300; ///
     this->p0 = 30e5;
 
     this->a0 = sqrt(gamma*R*T0);
