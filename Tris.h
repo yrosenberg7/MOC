@@ -4,6 +4,7 @@
 #include "Point.h"
 #include <list>
 #include <vector>
+#include <fstream>
 class Tris
 {
     public:
@@ -16,6 +17,7 @@ class Tris
         Tris tri2(int i, int j, std::vector<std::vector<Point> >& grid);
 
         void print(); //prints to std out
+        void print(std::ostream*);
 
         Point* get_p1()const{return this->pt1;}
         Point* get_p2()const{return this->pt2;}

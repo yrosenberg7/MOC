@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <iostream>
-
+#include <fstream>
 unsigned int Tris::id = 0;
 
 Tris::Tris()
@@ -36,6 +36,12 @@ void Tris::print()
     std::cout << (this->pt1)->get_id() << ", ";
     std::cout << (this->pt2)->get_id() << ", ";
     std::cout << (this->pt3)->get_id() << std::endl;
+}
+void Tris::print(std::ostream* out)
+{
+    *out << (this->pt1)->get_id()  <<","
+         << (this->pt2)->get_id() <<","
+         << (this->pt3)->get_id() << std::endl;
 }
 
 ///down left trsi
