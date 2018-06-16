@@ -15,6 +15,7 @@ class MoC_Solver
 
         Point Symmetry_Pt(Point*);
         Point Interior_Pt(Point*,Point*);
+        Point ISEN_Interior_Pt(Point*,Point*);
         Point Fixed_Wall_Pt(Point*);
         Point Fixed_Wall_Pt(Point* pt1, double (*fw)(double), double (*fp)(double));
         Point Variable_Wall_Pt(Point*,Point*);
@@ -30,6 +31,7 @@ class MoC_Solver
         double mean(double a, double b);
         double max_err(Eigen::Vector4d x, Eigen::Vector4d x_old);
         void print_Vec(Eigen::Vector4d x);
+        Eigen::Vector2d Interp_Vars(Eigen::Matrix2d A, double var1, double var2);
     private:
         Gas_Model* GM;
         Throat* TH;

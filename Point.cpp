@@ -2,9 +2,10 @@
 #include <cmath>
 #include <string>
 #include <iostream>
-#include <fstream>
+/** WARNING: INCOMPLETE*/
 
-int Point::id = 0; /// init object counter
+
+int Point::id = 0; //init object counter
 
 Point::Point()
 {
@@ -19,7 +20,7 @@ Point::Point()
     this->M = 0.0;
 
     this->cid = 0;
-
+    //this->tag = NA;
 }
 /// create point at location
 Point::Point(double xin,double yin)
@@ -35,6 +36,7 @@ Point::Point(double xin,double yin)
     this->M = 0;
 
     this->cid = id++;
+    //this->tag = NA;
 }
 
 Point::Point(double xin,double yin, double uin, double vin)
@@ -50,10 +52,12 @@ Point::Point(double xin,double yin, double uin, double vin)
     this->M = 0;
 
     this->cid = id++;
+    //this->tag = NA;
 }
 
 Point::Point(const Point& other)
 {
+//    std::cout << "COPY POINT!" << std::endl;
     this->x = other.get_x();
     this->y = other.get_y();
     this->u = other.get_u();
@@ -64,9 +68,16 @@ Point::Point(const Point& other)
     this->rho = other.get_rho();
     this->M = other.get_M();
 
+    //this->cid = id++;
     this->cid = other.get_id();
 }
 
+//Point::~Point()
+//{
+//    dtor
+//}
+
+//std::string Point::print()
 void Point::print()
 {
     std::cout << ""
@@ -81,20 +92,6 @@ void Point::print()
     << this->get_rho() <<"\t"
     << this->get_M() <<"\t"
     << std::endl;
-}
-void Point::print(std::ostream* out)
-{
-    *out <<  ""
-//    << this->get_id()<<","
-    << this->get_x() <<","
-    << this->get_y() <<","
-    << this->get_u() <<","
-    << this->get_v() <<","
-    << this->get_a() <<","
-    << this->get_T() <<","
-    << this->get_p() <<","
-    << this->get_rho()<<","
-    << this->get_M() << std::endl;
 }
 
 void Point::print_xm()
@@ -114,18 +111,42 @@ void Point::print_xu()
     <<"v: "<< this->get_v() <<"\t\t"
     << std::endl;
 }
+void Point::print(FILE* fout)
+{
+    fprintf(fout, "%i\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t\n",this->get_id(),this->get_x(),
+            this->get_y(),this->get_u(),this->get_v(),
+            this->get_a(),this->get_T(),this->get_p(),this->get_rho(),this->get_M());
+}
+
+
 
 void Point::finish_pt(Gas_Model* GM)
 {
+    //GM->print();
+
+//    #warning this just fills them with NAN!
     double U0 = sqrt(pow(this->get_u(),2) + pow(this->get_v(),2));
 
+    //double aa = GM->a_from_u(U0);
     this->set_a(GM->a_from_u(U0));
+
+    //std::cout << "a: " << aa << std::endl; /// why is a defined ?!?!?!?!?!?!?!
+    //this->set_a(aa);
     this->set_T(GM->T_from_a(this->get_a()));
     this->set_p(GM->p_from_T(this->get_T()));
     this->set_rho(GM->rho_from_pT(this->get_p(),this->get_T()));
     this->set_M(U0/this->get_a());
 
 }
+
+//bool Point::operator==(const Point& a, const Point& b)
+//bool Point::operator==(const Point& b) const
+//{
+//    //return ((b.get_x() == this->get_x()) && (b.get_y() == this->get_y()));
+//    return (this->get_x() == b.get_x()) && (this->get_y() == b.get_y());
+//}
+
+
 
 /// setters
 void Point::set_x(double xin){this->x = xin;}
@@ -154,6 +175,7 @@ double Point::get_p()const {return this->p;}
 double Point::get_rho()const {return this->rho;}
 double Point::get_M()const {return this->M;}
 int Point::get_id()const {return this->cid;}
+/// TODO: get loc
 
 bool Point::operator==(const Point& other)const
 {

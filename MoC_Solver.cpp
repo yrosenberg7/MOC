@@ -248,6 +248,201 @@ Point MoC_Solver::Interior_Pt(Point* pt1,Point* pt2)
 
 }
 
+Point MoC_Solver::ISEN_Interior_Pt(Point* pt1, Point* pt2)
+{
+    ///make sure a,p,T,rho,M have been calculated
+    pt1->finish_pt(this->GM);
+    pt2->finish_pt(this->GM);
+    double a0 = this->GM->get_a0();
+    double gamma = this->GM->get_gamma();
+    int delta = this->TH->get_delta();
+    double eps = this->get_eps();
+
+    double x1 = pt1->get_x();
+    double y1 = pt1->get_y();
+    double u1 = pt1->get_u();
+    double v1 = pt1->get_v();
+    double a1 = pt1->get_a();
+    double p1 = pt1->get_p();
+    double T1 = pt1->get_T();
+    double rh1 = pt1->get_rho();
+    double M1 = pt1->get_M();
+
+    double x2 = pt2->get_x();
+    double y2 = pt2->get_y();
+    double u2 = pt2->get_u();
+    double v2 = pt2->get_v();
+    double a2 = pt2->get_a();
+    double p2 = pt2->get_p();
+    double T2 = pt2->get_T();
+    double rh2 = pt2->get_rho();
+    double M2 = pt2->get_M();
+
+    double V2 = sqrt(u2*u2 + v2*v2);
+    double V1 = sqrt(u1*u1 + v1*v1);
+    double th2 = atan2(v2,u2);
+    double th1 = atan2(v1,u1);
+    double alpha2 = asin(1/M2);
+    double alpha1 = asin(1/M1);
+
+
+
+    /// CREATE INTERPOLATION VARIABLES
+    Eigen::Matrix2d A_interp;
+
+    A_interp << x1, y1, /// same for all
+                x2, y2;
+
+    Eigen::Vector2d x_interpv;
+    x_interpv = Interp_Vars(A_interp,V1,V2);
+    double av = x_interpv(0);
+    double bv = x_interpv(1);
+
+    Eigen::Vector2d x_interpth ;
+    x_interpth = Interp_Vars(A_interp,th1,th2);
+    double ath = x_interpth(0);
+    double bth = x_interpth(1);
+
+    Eigen::Vector2d x_interpp;
+    x_interpp = Interp_Vars(A_interp,p1,p2);
+    double ap = x_interpp(0);
+    double bp = x_interpp(1);
+
+    Eigen::Vector2d x_interprh;
+    x_interprh = Interp_Vars(A_interp,rh1,rh2);
+    double arh = x_interprh(0);
+    double brh = x_interprh(1);
+
+
+    /// Solver matrices
+    Eigen::MatrixXd A(12,12); /// 12 vars!
+    Eigen::VectorXd b(12);
+    Eigen::VectorXd x(12);
+    Eigen::VectorXd x_old(12);
+
+    bool done = false;
+    double err = 1;
+    int counter = 0;
+
+    double x3,y3,V3,p3,th3,rh3,x4,y4,p4,V4,th4,rh4;
+    double lam_0, lam_12, P_0, A_0, R_0;
+    double lam_p, lam_n, Q_p, Q_n,S_p,S_n;
+    double a3,alpha3,a4,T4;
+
+    while(!done)
+    {
+        if(counter == 0) /// set initial state
+        {
+            lam_p = tan(th2 + alpha2);
+            lam_n = tan(th1 + alpha1);
+
+            Q_p = sqrt(M2*M2 - 1)/(rh2*V2*V2);
+            Q_n = sqrt(M1*M1 - 1)/(rh1*V1*V1);
+            S_p = delta*sin(th2)/(y2*M2*cos(th2+alpha2));
+            S_n = delta*sin(th1)/(y1*M1*cos(th1+alpha1));
+
+            /// point 3 values: avg of 1,2
+            p3 = mean(p1,p2);
+            a3 = mean(a1,a2);
+            rh3 = mean(rh1,rh2);
+            V3 = mean(V1,V2);
+            th3 = mean(th1,th2);
+            alpha3 = mean(alpha1,alpha2);
+
+            /// need p4 to solve for
+            a4 = a2;
+            V4 = V1;
+            T4 = this->GM->T_from_a(a4);
+            p4 = this->GM->p_from_T(T4);
+            rh4 = this->GM->rho_from_pT(p4,T4);
+
+        }
+        else /// update guess
+        {
+            x_old = x;
+
+            x3 = x_old(0);
+            y3 = x_old(1);
+            V3 = x_old(2);
+            th3 = x_old(3);
+            p3 = x_old(4);
+            rh3 = x_old(5);
+            x4 = x_old(6);
+            y4 = x_old(7);
+            V4 = x_old(8);
+            th4 = x_old(9);
+            p4 = x_old(10);
+            rh4 = x_old(11);
+
+            /// UPDATE THESE: AVG OF 1or2 and 4
+            lam_p = tan(th2 + alpha2);
+            lam_n = tan(th1 + alpha1);
+            Q_p = sqrt(M2*M2 - 1)/(rh2*V2*V2);
+            Q_n = sqrt(M1*M1 - 1)/(rh1*V1*V1);
+            S_p = delta*sin(th2)/(y2*M2*cos(th2+alpha2));
+            S_n = delta*sin(th1)/(y1*M1*cos(th1+alpha1));
+
+            a3 = this->GM->a_from_u(V3);
+            alpha3 = asin(a3/V3);
+
+        }
+
+        R_0 = rh3*V3;
+        A_0 = a3*a3*a3;
+        lam_0 = tan(th3+alpha3);
+
+        A << -1*lam_0, 1, 0, 0, 0, 0, lam_0, -1, 0, 0, 0, 0,
+             0,       0, 0, 0, 0, 0, lam_p, 1, 0, 0, 0, 0,
+             0,       0, 0, 0, 0, 0, -1*lam_n, 1, 0, 0, 0, 0,
+             -1*lam_0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+             av, bv, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+             ath, bth, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0,
+             ap, bp, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0,
+             arh, brh, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, S_p, 0, 0, 1, Q_p, 0,
+             0, 0, 0, 0, 0, 0, S_n, 0, 0, -1, Q_n, 0,
+             0, 0, 0, 0, 0, 0, 0, 0, p3,  0,   1, 0,
+             0, 0, 0, 0, 0, 0, 0, 0, 0,  0,   1, -1*A_0;
+
+        b << 0,
+            -lam_p*x2 + y2,
+            -lam_n*x1 + y1,
+            -lam_12*x2 + y1,
+            0,
+            0,
+            0,
+            0,
+            S_p*x2 + Q_p*p2 + th2,
+            S_n*x1 + Q_n*p1 + th1,
+            R_0*V3 + p3,
+            p3 - A_0*rh4;
+
+        /// X = x3,y3,V3,Th3,p3,rh3,x4,y4,V4,Th4,p4,rh4
+        x = A.colPivHouseholderQr().solve(b); /// A\b
+
+        if(counter != 0) // skip otherwise
+        {
+            err = max_err(x, x_old);
+            if(this->get_disp()){std::cout << "at counter " << counter << " error: "  << err << std::endl;}
+            /// find err
+            if (err < eps)
+            {
+                done = true;
+            }else if(counter >= this->get_iter())
+            {
+                std::cout << "WARNING: MoC Irrotational Symmetry Point Solve did not converge in "<< this->get_iter() <<" iterations. " << std::endl;
+                break;
+            }
+        }
+
+        counter++;
+    } /// convergence loop
+
+    return Point();
+}
+
+
+
 Point MoC_Solver::Fixed_Wall_Pt(Point* pt1, double (*fw)(double), double (*fp)(double))
 {
     double a0 = this->GM->get_a0();
@@ -368,9 +563,7 @@ double MoC_Solver::max_err(Eigen::Vector4d x, Eigen::Vector4d x_old) /// assumes
         std::cout << std::endl;
         print_Vec(x_old);
         print_Vec(x);
-
     }
-
 
     int n = x.size();
     double vars[n];
@@ -390,4 +583,13 @@ double MoC_Solver::max_err(Eigen::Vector4d x, Eigen::Vector4d x_old) /// assumes
 void MoC_Solver::print_Vec(Eigen::Vector4d x)
 {
     std::cout << "x(0): " << x(0) << ", x(1): " << x(1) << ", x(2): " << x(2) << ", x(3): " << x(3) << std::endl;
+}
+
+Eigen::Vector2d MoC_Solver::Interp_Vars(Eigen::Matrix2d A, double var1, double var2)
+{
+    Eigen::Vector2d b_interp;
+    b_interp << var1,var2;
+    Eigen::Vector2d x;
+    x = A.colPivHouseholderQr().solve(b_interp); /// A\b
+    return x;
 }
